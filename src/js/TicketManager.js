@@ -1,6 +1,6 @@
 const XMLHttpRequest = require('xhr2');
 
-class DbHandler {
+class TicketManager {
     static baseUrl = 'https://getpantry.cloud/apiv1/pantry/';
     static secretId = 'b1e0fafb-3b18-406b-8929-417a8064e301';
 
@@ -39,7 +39,7 @@ class DbHandler {
                 if (this.readyState === 4) resolve(JSON.parse(this.responseText).baskets);
             });
 
-            xhr.open("GET", DbHandler.baseUrl + DbHandler.secretId);
+            xhr.open("GET", TicketManager.baseUrl + TicketManager.secretId);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             xhr.send()
@@ -55,7 +55,7 @@ class DbHandler {
                 if (this.readyState === 4) resolve(JSON.parse(this.responseText));
             });
 
-            xhr.open("GET", DbHandler.baseUrl + DbHandler.secretId + '/basket/' + id);
+            xhr.open("GET", TicketManager.baseUrl + TicketManager.secretId + '/basket/' + id);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             xhr.send()
@@ -64,13 +64,6 @@ class DbHandler {
 
     async createTask(body) {
         body = JSON.stringify(body);
-        // узнать зарегистрированные id
-        // найти в них максимальный + 1
-        // валидация полей
-        // отправить запрос
-
-        console.log('получен post запрос')
-        console.log(body)
 
         let ids = [];
         await this.getIds()
@@ -88,12 +81,29 @@ class DbHandler {
                 if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) resolve(true);
             });
 
-            xhr.open("POST", DbHandler.baseUrl + DbHandler.secretId + '/basket/' + idToSave);
+            xhr.open("POST", TicketManager.baseUrl + TicketManager.secretId + '/basket/' + idToSave);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             xhr.send(body)
         });
     }
+
+    deleteTask(body){
+        console.log(body.id)
+        return new Promise(function (resolve, reject) {
+            const xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener('readystatechange', function () {
+                if (this.readyState === 4) resolve(true);
+            });
+
+            xhr.open("DELETE", TicketManager.baseUrl + TicketManager.secretId + '/basket/' + body.id);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send()
+        });
+    }
 }
 
-module.exports = DbHandler;
+module.exports = TicketManager;

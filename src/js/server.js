@@ -1,4 +1,4 @@
-const DbHandler = require('./DbHandler');
+const DbHandler = require('./TicketManager');
 const http = require('http');
 const Koa = require('koa');
 const koaBody = require('koa-body');
@@ -43,10 +43,10 @@ router.post('/', koaBody({multipart: true}),
                     body.status !== null && body.status !== undefined
                 ) {
                     const saved = await db.createTask(body);
-                    console.log('сохранено ' + saved);
                 }
                 return;
             case 'deleteTicket':
+                const deleted = await db.deleteTask(body);
                 return;
         }
     });
@@ -55,4 +55,5 @@ app
     .use(router.routes())
     .use(router.allowedMethods());
 
-http.createServer(app.callback()).listen(8888);
+const port = process.env.PORT || 8888;
+const server = http.createServer(app.callback()).listen(port)
