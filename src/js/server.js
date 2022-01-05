@@ -2,7 +2,6 @@ const DbHandler = require('./DbHandler');
 const http = require('http');
 const Koa = require('koa');
 const koaBody = require('koa-body');
-//const bodyParser = require('koa-bodyparser');
 const Router = require('koa-router');
 
 const app = new Koa();
@@ -32,11 +31,20 @@ router.get('/', async (ctx, next) => {
 
 router.post('/', koaBody({multipart: true}),
     async (ctx, next) => {
-        console.log(ctx.request.querystring);
-        console.log(ctx.request.body);
-        switch ('123') {
-            case 'createTicket':
 
+        const query = ctx.request.query;
+        const body = ctx.request.body;
+
+        switch (query.method) {
+            case 'createTicket':
+                if (body.shortDescription !== null && body.shortDescription !== undefined &&
+                    body.description !== null && body.description !== undefined &&
+                    body.creationDate !== null && body.creationDate !== undefined &&
+                    body.status !== null && body.status !== undefined
+                ) {
+                    const saved = await db.createTask(body);
+                    console.log('сохранено ' + saved);
+                }
                 return;
             case 'deleteTicket':
                 return;

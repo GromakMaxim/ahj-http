@@ -62,8 +62,37 @@ class DbHandler {
         })
     }
 
-    createTask() {
+    async createTask(body) {
+        body = JSON.stringify(body);
+        // узнать зарегистрированные id
+        // найти в них максимальный + 1
+        // валидация полей
+        // отправить запрос
 
+        console.log('получен post запрос')
+        console.log(body)
+
+        let ids = [];
+        await this.getIds()
+            .then(
+                result => result.forEach((item) => ids.push(parseInt(item.name))),
+                error => ids = null
+            )
+        const idToSave = await Math.max.apply(null, ids) + 1;
+
+        return new Promise(function (resolve, reject) {
+            const xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener('readystatechange', function () {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) resolve(true);
+            });
+
+            xhr.open("POST", DbHandler.baseUrl + DbHandler.secretId + '/basket/' + idToSave);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send(body)
+        });
     }
 }
 
