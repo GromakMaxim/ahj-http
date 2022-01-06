@@ -11,6 +11,7 @@ const db = new DbHandler;
 
 router.get('/', async (ctx, next) => {
     const query = ctx.request.query;
+    console.log(query)
     switch (query.method) {
         case 'allTickets':
             await db.getAllTickets()
@@ -34,7 +35,8 @@ router.post('/', koaBody({multipart: true}),
 
         const query = ctx.request.query;
         const body = ctx.request.body;
-
+        console.log(query)
+        console.log(body)
         switch (query.method) {
             case 'createTicket':
                 if (body.shortDescription !== null && body.shortDescription !== undefined &&
