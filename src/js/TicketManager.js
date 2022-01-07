@@ -1,8 +1,9 @@
 const XMLHttpRequest = require('xhr2');
 
+const baseUrl = 'https://getpantry.cloud/apiv1/pantry/';
+const secretId = 'b1e0fafb-3b18-406b-8929-417a8064e301';
+
 class TicketManager {
-    static baseUrl = 'https://getpantry.cloud/apiv1/pantry/';
-    static secretId = 'b1e0fafb-3b18-406b-8929-417a8064e301';
 
     constructor() {
 
@@ -13,7 +14,10 @@ class TicketManager {
         await this.getIds()
             .then(
                 result => result.forEach((item) => ids.push(parseInt(item.name))),
-                error => ids = null
+                error => {
+                    ids = null;
+                    console.log(error);
+                }
             )
 
         ids.sort((v1, v2) => v1 - v2);
@@ -24,7 +28,10 @@ class TicketManager {
             await this.getTaskById(id)
                 .then(
                     result => tasks.push(result),
-                    error => tasks = null
+                    error => {
+                        tasks = null;
+                        console.log(error);
+                    }
                 )
         }
         return tasks;
@@ -39,7 +46,7 @@ class TicketManager {
                 if (this.readyState === 4) resolve(JSON.parse(this.responseText).baskets);
             });
 
-            xhr.open("GET", TicketManager.baseUrl + TicketManager.secretId);
+            xhr.open("GET", baseUrl + secretId);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             xhr.send()
@@ -55,7 +62,7 @@ class TicketManager {
                 if (this.readyState === 4) resolve(JSON.parse(this.responseText));
             });
 
-            xhr.open("GET", TicketManager.baseUrl + TicketManager.secretId + '/basket/' + id);
+            xhr.open("GET", baseUrl + secretId + '/basket/' + id);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             xhr.send()
@@ -69,7 +76,10 @@ class TicketManager {
         await this.getIds()
             .then(
                 result => result.forEach((item) => ids.push(parseInt(item.name))),
-                error => ids = null
+                error => {
+                    ids = null;
+                    console.log(error);
+                }
             )
         const idToSave = await Math.max.apply(null, ids) + 1;
 
@@ -81,14 +91,14 @@ class TicketManager {
                 if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) resolve(true);
             });
 
-            xhr.open("POST", TicketManager.baseUrl + TicketManager.secretId + '/basket/' + idToSave);
+            xhr.open("POST", baseUrl + secretId + '/basket/' + idToSave);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             xhr.send(body)
         });
     }
 
-    deleteTask(body){
+    deleteTask(body) {
         console.log(body.id)
         return new Promise(function (resolve, reject) {
             const xhr = new XMLHttpRequest();
@@ -98,7 +108,7 @@ class TicketManager {
                 if (this.readyState === 4) resolve(true);
             });
 
-            xhr.open("DELETE", TicketManager.baseUrl + TicketManager.secretId + '/basket/' + body.id);
+            xhr.open("DELETE", baseUrl + secretId + '/basket/' + body.id);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             xhr.send()
