@@ -1,6 +1,7 @@
 const DbHandler = require('./TicketManager');
 const http = require('http');
 const Koa = require('koa');
+const cors = require('@koa/cors');
 const koaBody = require('koa-body');
 const Router = require('koa-router');
 
@@ -53,7 +54,9 @@ router.post('/', koaBody({multipart: true}),
         }
     });
 
+
 app
+    .use(cors())
     .use(router.routes())
     .use(router.allowedMethods());
 
