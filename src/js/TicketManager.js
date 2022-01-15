@@ -70,7 +70,8 @@ class TicketManager {
     }
 
     async createTask(body) {
-        body = JSON.stringify(body);
+
+        console.log(body)
 
         let ids = [];
         await this.getIds()
@@ -81,14 +82,35 @@ class TicketManager {
                     console.log(error);
                 }
             )
-        const idToSave = await Math.max.apply(null, ids) + 1;
 
+        const foundId = ids.filter((id) => {
+            return id === parseInt(body.id);
+        });
+
+        let idToSave = body.id;
+        let response;
+
+        if (foundId.length === 0) {
+            response = {
+                "savedId": body.id,
+                "type": "new",
+                "savedContent": body,
+            }
+        } else {
+            response = {
+                "savedId": idToSave,
+                "type": "edited",
+                "savedContent": body,
+            }
+        }
+
+        body = JSON.stringify(body);
         return new Promise(function (resolve, reject) {
             const xhr = new XMLHttpRequest();
             xhr.withCredentials = true;
 
             xhr.addEventListener('readystatechange', function () {
-                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) resolve(true);
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) resolve(response);
             });
 
             xhr.open("POST", baseUrl + secretId + '/basket/' + idToSave);

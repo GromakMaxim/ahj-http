@@ -43,9 +43,11 @@ router.post('/', koaBody({multipart: true}),
                 if (body.shortDescription !== null && body.shortDescription !== undefined &&
                     body.description !== null && body.description !== undefined &&
                     body.creationDate !== null && body.creationDate !== undefined &&
-                    body.status !== null && body.status !== undefined
+                    body.status !== null && body.status !== undefined &&
+                    body.id !== null && body.id !== undefined
                 ) {
                     const saved = await db.createTask(body);
+                    ctx.response.body = saved;
                 }
                 return;
             case 'deleteTicket':
