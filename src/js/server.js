@@ -15,10 +15,8 @@ router.get('/', async (ctx, next) => {
     console.log(query)
     switch (query.method) {
         case 'allTickets':
-            await db.getAllTickets()
-                .then(
-                    result => ctx.response.body = result,
-                );
+            const list = await db.getTaskList();
+            ctx.response.body = list;
             return;
 
         case 'ticketById':

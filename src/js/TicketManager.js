@@ -37,6 +37,22 @@ class TicketManager {
         return tasks;
     }
 
+    getTaskList() {
+        return new Promise(function (resolve, reject) {
+            const xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener('readystatechange', function () {
+                if (this.readyState === 4) resolve(JSON.parse(this.responseText));
+            });
+
+            xhr.open("GET", baseUrl + secretId + '/basket/main');
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send()
+        })
+    }
+
     getIds() {
         return new Promise(function (resolve, reject) {
             const xhr = new XMLHttpRequest();
