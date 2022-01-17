@@ -1,4 +1,5 @@
 const DbHandler = require('./TicketManager');
+
 const http = require('http');
 const Koa = require('koa');
 const cors = require('@koa/cors');
@@ -44,8 +45,7 @@ router.post('/', koaBody({multipart: true}),
                     body.status !== null && body.status !== undefined &&
                     body.id !== null && body.id !== undefined
                 ) {
-                    const saved = await db.createTask(body);
-                    ctx.response.body = saved;
+                    await db.createTask(body);
                 }
                 return;
             case 'deleteTicket':

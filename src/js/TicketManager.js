@@ -1,4 +1,6 @@
 const XMLHttpRequest = require('xhr2');
+const SimpleFileReader = require('./SimpleFileReader');
+const SimpleFileWriter = require('./SimpleFileWriter');
 
 const baseUrl = 'https://getpantry.cloud/apiv1/pantry/';
 const secretId = 'b1e0fafb-3b18-406b-8929-417a8064e301';
@@ -9,131 +11,44 @@ class TicketManager {
 
     }
 
-    async getAllTickets() {
-        let ids = [];
-        await this.getIds()
-            .then(
-                result => result.forEach((item) => ids.push(parseInt(item.name))),
-                error => {
-                    ids = null;
-                    console.log(error);
-                }
-            )
-
-        ids.sort((v1, v2) => v1 - v2);
-
-        let tasks = [];
-
-        for (let id of ids) {
-            await this.getTaskById(id)
-                .then(
-                    result => tasks.push(result),
-                    error => {
-                        tasks = null;
-                        console.log(error);
-                    }
-                )
-        }
-        return tasks;
-    }
-
     getTaskList() {
         return new Promise(function (resolve, reject) {
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener('readystatechange', function () {
-                if (this.readyState === 4) resolve(JSON.parse(this.responseText));
-            });
-
-            xhr.open("GET", baseUrl + secretId + '/basket/main');
-            xhr.setRequestHeader("Content-Type", "application/json");
-
-            xhr.send()
-        })
-    }
-
-    getIds() {
-        return new Promise(function (resolve, reject) {
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener('readystatechange', function () {
-                if (this.readyState === 4) resolve(JSON.parse(this.responseText).baskets);
-            });
-
-            xhr.open("GET", baseUrl + secretId);
-            xhr.setRequestHeader("Content-Type", "application/json");
-
-            xhr.send()
+            const reader = new SimpleFileReader();
+            resolve(reader.read());
         });
-    }
-
-    getTaskById(id) {
-        return new Promise(function (resolve, reject) {
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener('readystatechange', function () {
-                if (this.readyState === 4) resolve(JSON.parse(this.responseText));
-            });
-
-            xhr.open("GET", baseUrl + secretId + '/basket/' + id);
-            xhr.setRequestHeader("Content-Type", "application/json");
-
-            xhr.send()
-        })
     }
 
     async createTask(body) {
+        console.log('---------------------------------------------------------------------------------')
+        const writer = new SimpleFileWriter();
+        const reader = new SimpleFileReader();
+        const dbContent = await reader.read();
 
-        console.log(body)
-
-        let ids = [];
-        await this.getIds()
-            .then(
-                result => result.forEach((item) => ids.push(parseInt(item.name))),
-                error => {
-                    ids = null;
-                    console.log(error);
-                }
-            )
-
-        const foundId = ids.filter((id) => {
-            return id === parseInt(body.id);
-        });
-
-        let idToSave = body.id;
-        let response;
-
-        if (foundId.length === 0) {
-            response = {
-                "savedId": body.id,
-                "type": "new",
-                "savedContent": body,
-            }
-        } else {
-            response = {
-                "savedId": idToSave,
-                "type": "edited",
-                "savedContent": body,
-            }
+        let jsonRequest = {
+            "tasks": [],
         }
 
-        body = JSON.stringify(body);
-        return new Promise(function (resolve, reject) {
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
+        let idFound = false;
+        for (let task of dbContent.tasks) {
+            if (parseInt(task.id) === parseInt(body.id)) {
+                idFound = true;
+                task.description = body.description;
+                task.shortDescription = body.shortDescription;
+                task.creationDate = body.creationDate;
+                task.closingDate = body.closingDate;
+                task.status = body.status;
+                task.isHidden = body.isHidden;
+            }
+            jsonRequest.tasks.push(task);
+        }
 
-            xhr.addEventListener('readystatechange', function () {
-                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) resolve(response);
-            });
+        if (!idFound){
+            body.id = parseInt(body.id);
+            dbContent.tasks.push(body);
+        }
 
-            xhr.open("POST", baseUrl + secretId + '/basket/' + idToSave);
-            xhr.setRequestHeader("Content-Type", "application/json");
-
-            xhr.send(body)
-        });
+        const result = await writer.write(JSON.stringify(dbContent));
+        return result;
     }
 
     deleteTask(body) {
