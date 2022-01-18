@@ -2,9 +2,6 @@ const XMLHttpRequest = require('xhr2');
 const SimpleFileReader = require('./SimpleFileReader');
 const SimpleFileWriter = require('./SimpleFileWriter');
 
-const baseUrl = 'https://getpantry.cloud/apiv1/pantry/';
-const secretId = 'b1e0fafb-3b18-406b-8929-417a8064e301';
-
 class TicketManager {
 
     constructor() {

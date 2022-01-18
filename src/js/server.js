@@ -45,7 +45,9 @@ router.post('/', koaBody({multipart: true}),
                     body.status !== null && body.status !== undefined &&
                     body.id !== null && body.id !== undefined
                 ) {
-                    await db.createTask(body);
+                    const result = await db.createTask(body).then(
+                        resolve => console.log(resolve)
+                    );
                 }
                 return;
             case 'deleteTicket':
