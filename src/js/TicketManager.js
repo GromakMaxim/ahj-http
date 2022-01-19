@@ -5,64 +5,44 @@ const SimpleFileWriter = require('./SimpleFileWriter');
 class TicketManager {
 
     constructor() {
-
+        this.map = new Map();
+        this.fillMap();
     }
 
-    getTaskList() {
-        return new Promise(function (resolve, reject) {
-            const reader = new SimpleFileReader();
-            resolve(reader.read());
-        });
+
+    async getTaskList() {
+        const reader = new SimpleFileReader();
+        let content = await reader.read();
+        return content;
     }
 
     async createTask(body) {
-        console.log('---------------------------------------------------------------------------------')
-        const writer = new SimpleFileWriter();
-        const reader = new SimpleFileReader();
-        const dbContent = await reader.read();
+        body.id = parseInt(body.id);
+        this.map.set(body.id, body);
 
         let jsonRequest = {
             "tasks": [],
         }
 
-        let idFound = false;
-        for (let task of dbContent.tasks) {
-            if (parseInt(task.id) === parseInt(body.id)) {
-                idFound = true;
-                task.description = body.description;
-                task.shortDescription = body.shortDescription;
-                task.creationDate = body.creationDate;
-                task.closingDate = body.closingDate;
-                task.status = body.status;
-                task.isHidden = body.isHidden;
-            }
+        for (let task of this.map.values()){
             jsonRequest.tasks.push(task);
         }
 
-        if (!idFound){
-            body.id = parseInt(body.id);
-            dbContent.tasks.push(body);
-        }
-
-        const result = await writer.write(JSON.stringify(dbContent));
-        return result;
+        return jsonRequest;
     }
 
     deleteTask(body) {
-        console.log(body.id)
-        return new Promise(function (resolve, reject) {
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
 
-            xhr.addEventListener('readystatechange', function () {
-                if (this.readyState === 4) resolve(true);
-            });
+    }
 
-            xhr.open("DELETE", baseUrl + secretId + '/basket/' + body.id);
-            xhr.setRequestHeader("Content-Type", "application/json");
+    async fillMap(){
+        const reader = new SimpleFileReader();
+        let content = await reader.read();
+        let tasks = content.tasks;
 
-            xhr.send()
-        });
+        tasks.forEach(task=>{
+            this.map.set(task.id, task);
+        })
     }
 }
 

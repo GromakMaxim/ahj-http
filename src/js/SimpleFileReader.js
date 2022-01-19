@@ -4,14 +4,12 @@ class SimpleFileReader {
     constructor() {
 
     }
-    read() {
-        return new Promise((resolve, reject)=>{
-            fs.readFile("db.txt", "utf8",
-                function (error, data) {
-                    if (error) throw new Error('file db.txt is not available');
-                    resolve(JSON.parse(data));
-                });
-        });
+
+    async read() {
+        console.log('inside read method')
+        let content = JSON.parse(fs.readFileSync("db.txt", "utf8"));
+        console.log('read this: ' + content);
+        return content;
     }
 }
 

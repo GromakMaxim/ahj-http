@@ -1,4 +1,5 @@
 const DbHandler = require('./TicketManager');
+const SimpleFileWriter = require('./SimpleFileWriter');
 
 const http = require('http');
 const Koa = require('koa');
@@ -6,8 +7,10 @@ const cors = require('@koa/cors');
 const koaBody = require('koa-body');
 const Router = require('koa-router');
 
+
 const app = new Koa();
 const router = new Router();
+const writer = new SimpleFileWriter();
 
 const db = new DbHandler;
 
@@ -16,8 +19,9 @@ router.get('/', async (ctx, next) => {
     console.log(query)
     switch (query.method) {
         case 'allTickets':
-            const list = await db.getTaskList();
-            ctx.response.body = list;
+            let content = await db.getTaskList();
+            ctx.response.body = content;
+            ctx.response.status = 200;
             return;
 
         case 'ticketById':
@@ -30,25 +34,21 @@ router.get('/', async (ctx, next) => {
     }
 });
 
+let contentToSave = null;
+
 router.post('/', koaBody({multipart: true}),
+
     async (ctx, next) => {
 
         const query = ctx.request.query;
         const body = ctx.request.body;
         console.log(query)
-        console.log(body)
         switch (query.method) {
             case 'createTicket':
-                if (body.shortDescription !== null && body.shortDescription !== undefined &&
-                    body.description !== null && body.description !== undefined &&
-                    body.creationDate !== null && body.creationDate !== undefined &&
-                    body.status !== null && body.status !== undefined &&
-                    body.id !== null && body.id !== undefined
-                ) {
-                    const result = await db.createTask(body).then(
-                        resolve => console.log(resolve)
-                    );
-                }
+                let content = await db.createTask(body);
+                ctx.response.body = content;
+                ctx.response.status = 200;
+                await writer.write(JSON.stringify(content));
                 return;
             case 'deleteTicket':
                 const deleted = await db.deleteTask(body);

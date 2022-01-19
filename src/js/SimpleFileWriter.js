@@ -5,8 +5,9 @@ class SimpleFileWriter {
 
     }
 
-    write(content) {
+    async write(content) {
         fs.writeFileSync("db.txt", content);
+
     }
 }
 
