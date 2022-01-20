@@ -17,6 +17,9 @@ class TicketManager {
     }
 
     async createTask(body) {
+        console.log('create task')
+        console.log(body)
+
         body.id = parseInt(body.id);
         this.map.set(body.id, body);
 
@@ -28,11 +31,26 @@ class TicketManager {
             jsonRequest.tasks.push(task);
         }
 
+        this.map.delete(null)
+        console.log(this.map)
         return jsonRequest;
     }
 
-    deleteTask(body) {
+    async deleteTask(body) {
+        body.id = parseInt(body.id);
+        this.map.delete(body.id);
 
+        let jsonRequest = {
+            "tasks": [],
+        }
+
+        this.map.delete(null);
+
+        for (let task of this.map.values()){
+            jsonRequest.tasks.push(task);
+        }
+
+        return jsonRequest;
     }
 
     async fillMap(){

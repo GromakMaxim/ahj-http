@@ -34,8 +34,6 @@ router.get('/', async (ctx, next) => {
     }
 });
 
-let contentToSave = null;
-
 router.post('/', koaBody({multipart: true}),
 
     async (ctx, next) => {
@@ -43,6 +41,7 @@ router.post('/', koaBody({multipart: true}),
         const query = ctx.request.query;
         const body = ctx.request.body;
         console.log(query)
+
         switch (query.method) {
             case 'createTicket':
                 let content = await db.createTask(body);
@@ -50,8 +49,12 @@ router.post('/', koaBody({multipart: true}),
                 ctx.response.status = 200;
                 await writer.write(JSON.stringify(content));
                 return;
+
             case 'deleteTicket':
                 const deleted = await db.deleteTask(body);
+                ctx.response.body = deleted;
+                ctx.response.status = 200;
+                await writer.write(JSON.stringify(deleted));
                 return;
         }
     });
